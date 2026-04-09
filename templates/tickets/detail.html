@@ -1,0 +1,543 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ticket.ticket_key }} - {{ ticket.title }} | ProjectForge{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Navigation -->
+<nav class="flex mb-6" aria-label="Breadcrumb">
+    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+        <li class="inline-flex items-center">
+            <a href="/dashboard" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-primary-600">
+                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
+                Dashboard
+            </a>
+        </li>
+        <li>
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                </svg>
+                <a href="/projects/{{ project.id }}" class="ml-1 text-sm font-medium text-gray-500 hover:text-primary-600 md:ml-2">{{ project.name }}</a>
+            </div>
+        </li>
+        <li>
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                </svg>
+                <a href="/projects/{{ project.id }}/tickets" class="ml-1 text-sm font-medium text-gray-500 hover:text-primary-600 md:ml-2">Tickets</a>
+            </div>
+        </li>
+        <li aria-current="page">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                </svg>
+                <span class="ml-1 text-sm font-medium text-gray-700 md:ml-2">{{ ticket.ticket_key }}</span>
+            </div>
+        </li>
+    </ol>
+</nav>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main Content -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Ticket Header -->
+        <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-3 mb-2">
+                        <span class="text-sm font-mono font-semibold text-primary-600 bg-primary-50 px-2 py-0.5 rounded">{{ ticket.ticket_key }}</span>
+                        <!-- Type Badge -->
+                        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                            {% if ticket.type == 'bug' %}bg-red-100 text-red-800
+                            {% elif ticket.type == 'feature' %}bg-green-100 text-green-800
+                            {% elif ticket.type == 'task' %}bg-blue-100 text-blue-800
+                            {% elif ticket.type == 'improvement' %}bg-yellow-100 text-yellow-800
+                            {% elif ticket.type == 'epic' %}bg-purple-100 text-purple-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ ticket.type | replace('_', ' ') | title }}
+                        </span>
+                        <!-- Priority Badge -->
+                        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                            {% if ticket.priority == 'critical' %}bg-red-100 text-red-800
+                            {% elif ticket.priority == 'high' %}bg-orange-100 text-orange-800
+                            {% elif ticket.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                            {% elif ticket.priority == 'low' %}bg-green-100 text-green-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ ticket.priority | title }}
+                        </span>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900">{{ ticket.title }}</h1>
+                </div>
+                {% if current_user.role in ['super_admin', 'org_admin', 'project_manager', 'team_lead'] or (current_user.id == ticket.reporter_id) %}
+                <a href="/projects/{{ project.id }}/tickets/{{ ticket.id }}/edit" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                    <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                    </svg>
+                    Edit
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Status Badge -->
+            <div class="mb-4">
+                <span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium
+                    {% if ticket.status == 'open' %}bg-blue-100 text-blue-800
+                    {% elif ticket.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                    {% elif ticket.status == 'in_review' %}bg-purple-100 text-purple-800
+                    {% elif ticket.status == 'resolved' %}bg-green-100 text-green-800
+                    {% elif ticket.status == 'closed' %}bg-gray-100 text-gray-800
+                    {% elif ticket.status == 'reopened' %}bg-red-100 text-red-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ ticket.status | replace('_', ' ') | title }}
+                </span>
+            </div>
+
+            <!-- Status Change Buttons -->
+            <div class="flex flex-wrap gap-2 mb-6 pb-6 border-b border-gray-200">
+                <span class="text-sm font-medium text-gray-500 mr-2 self-center">Move to:</span>
+                {% set all_statuses = ['open', 'in_progress', 'in_review', 'resolved', 'closed', 'reopened'] %}
+                {% for status in all_statuses %}
+                    {% if status != ticket.status %}
+                    <form method="POST" action="/projects/{{ project.id }}/tickets/{{ ticket.id }}/status" class="inline">
+                        <input type="hidden" name="status" value="{{ status }}">
+                        <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary-500 transition-colors duration-150">
+                            {{ status | replace('_', ' ') | title }}
+                        </button>
+                    </form>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- Description -->
+            <div>
+                <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Description</h2>
+                {% if ticket.description %}
+                <div class="prose prose-sm max-w-none text-gray-700">
+                    {{ ticket.description }}
+                </div>
+                {% else %}
+                <p class="text-sm text-gray-400 italic">No description provided.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Subtasks -->
+        {% if subtasks %}
+        <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" />
+                </svg>
+                Subtasks
+                <span class="ml-2 text-sm font-normal text-gray-500">({{ subtasks | length }})</span>
+            </h2>
+            <div class="space-y-2">
+                {% for subtask in subtasks %}
+                <a href="/projects/{{ project.id }}/tickets/{{ subtask.id }}" class="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors duration-150">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs font-mono font-medium text-primary-600">{{ subtask.ticket_key }}</span>
+                        <span class="text-sm text-gray-900">{{ subtask.title }}</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+                            {% if subtask.status == 'open' %}bg-blue-100 text-blue-800
+                            {% elif subtask.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                            {% elif subtask.status == 'in_review' %}bg-purple-100 text-purple-800
+                            {% elif subtask.status == 'resolved' %}bg-green-100 text-green-800
+                            {% elif subtask.status == 'closed' %}bg-gray-100 text-gray-800
+                            {% elif subtask.status == 'reopened' %}bg-red-100 text-red-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ subtask.status | replace('_', ' ') | title }}
+                        </span>
+                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+                            {% if subtask.priority == 'critical' %}bg-red-100 text-red-800
+                            {% elif subtask.priority == 'high' %}bg-orange-100 text-orange-800
+                            {% elif subtask.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                            {% elif subtask.priority == 'low' %}bg-green-100 text-green-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ subtask.priority | title }}
+                        </span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Comments Section -->
+        <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                </svg>
+                Comments
+                <span class="ml-2 text-sm font-normal text-gray-500">({{ comments | length }})</span>
+            </h2>
+
+            <!-- Add Comment Form -->
+            <form method="POST" action="/projects/{{ project.id }}/tickets/{{ ticket.id }}/comments" class="mb-6">
+                <div class="mb-3">
+                    <label for="content" class="sr-only">Add a comment</label>
+                    <textarea id="content" name="content" rows="3" required
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm placeholder-gray-400"
+                        placeholder="Write a comment..."></textarea>
+                </div>
+                <div class="flex items-center justify-between">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" name="is_internal" value="true" class="rounded border-gray-300 text-primary-600 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-600">Internal note</span>
+                        <span class="ml-1 text-xs text-gray-400">(only visible to team members)</span>
+                    </label>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                        <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                        </svg>
+                        Add Comment
+                    </button>
+                </div>
+            </form>
+
+            <!-- Comments List -->
+            {% if comments %}
+            <div class="space-y-4">
+                {% for comment in comments %}
+                <div class="relative p-4 rounded-lg border {% if comment.is_internal %}border-yellow-200 bg-yellow-50{% else %}border-gray-100 bg-gray-50{% endif %}">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
+                                <span class="text-xs font-medium text-primary-700">
+                                    {% if comment.user %}{{ comment.user.username[:2] | upper }}{% else %}??{% endif %}
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-900">
+                                    {% if comment.user %}{{ comment.user.username }}{% else %}Unknown{% endif %}
+                                </span>
+                                <span class="text-xs text-gray-500 ml-2">
+                                    {{ comment.created_at.strftime('%b %d, %Y at %I:%M %p') if comment.created_at else '' }}
+                                </span>
+                            </div>
+                            {% if comment.is_internal %}
+                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800">
+                                <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                </svg>
+                                Internal
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% if current_user.id == comment.user_id or current_user.role in ['super_admin', 'org_admin', 'project_manager'] %}
+                        <form method="POST" action="/projects/{{ project.id }}/tickets/{{ ticket.id }}/comments/{{ comment.id }}/delete" class="inline"
+                            onsubmit="return confirm('Are you sure you want to delete this comment?');">
+                            <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors duration-150" title="Delete comment">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                </svg>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    <div class="mt-2 ml-10 text-sm text-gray-700 whitespace-pre-wrap">{{ comment.content }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-6">
+                <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                </svg>
+                <p class="mt-2 text-sm text-gray-500">No comments yet. Be the first to comment.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Time Entries Section -->
+        <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Time Entries
+                {% if time_entries %}
+                <span class="ml-2 text-sm font-normal text-gray-500">({{ total_hours }} hours total)</span>
+                {% endif %}
+            </h2>
+
+            <!-- Log Time Form -->
+            <form method="POST" action="/projects/{{ project.id }}/tickets/{{ ticket.id }}/time-entries" class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                <h3 class="text-sm font-medium text-gray-700 mb-3">Log Time</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label for="hours" class="block text-xs font-medium text-gray-600 mb-1">Hours <span class="text-red-500">*</span></label>
+                        <input type="number" id="hours" name="hours" step="0.25" min="0.25" required
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                            placeholder="1.5">
+                    </div>
+                    <div>
+                        <label for="spent_date" class="block text-xs font-medium text-gray-600 mb-1">Date <span class="text-red-500">*</span></label>
+                        <input type="date" id="spent_date" name="spent_date" required
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="time_description" class="block text-xs font-medium text-gray-600 mb-1">Description</label>
+                        <input type="text" id="time_description" name="description"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                            placeholder="What did you work on?">
+                    </div>
+                </div>
+                <div class="mt-3 flex justify-end">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                        <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        Log Time
+                    </button>
+                </div>
+            </form>
+
+            <!-- Time Entries List -->
+            {% if time_entries %}
+            <div class="overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
+                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                            <th scope="col" class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for entry in time_entries %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                {% if entry.user %}{{ entry.user.username }}{% else %}Unknown{% endif %}
+                            </td>
+                            <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                                {{ entry.spent_date.strftime('%b %d, %Y') if entry.spent_date else '' }}
+                            </td>
+                            <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {{ entry.hours }}h
+                            </td>
+                            <td class="px-3 py-2 text-sm text-gray-500 max-w-xs truncate">
+                                {{ entry.description or '—' }}
+                            </td>
+                            <td class="px-3 py-2 whitespace-nowrap text-right text-sm">
+                                {% if current_user.id == entry.user_id %}
+                                <form method="POST" action="/projects/{{ project.id }}/tickets/{{ ticket.id }}/time-entries/{{ entry.id }}/delete" class="inline"
+                                    onsubmit="return confirm('Delete this time entry?');">
+                                    <button type="submit" class="text-red-500 hover:text-red-700 transition-colors duration-150" title="Delete time entry">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                        </svg>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-6">
+                <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="mt-2 text-sm text-gray-500">No time logged yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1 space-y-6">
+        <!-- Ticket Details -->
+        <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
+            <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Details</h2>
+            <dl class="space-y-4">
+                <!-- Status -->
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Status</dt>
+                    <dd class="mt-1">
+                        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                            {% if ticket.status == 'open' %}bg-blue-100 text-blue-800
+                            {% elif ticket.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                            {% elif ticket.status == 'in_review' %}bg-purple-100 text-purple-800
+                            {% elif ticket.status == 'resolved' %}bg-green-100 text-green-800
+                            {% elif ticket.status == 'closed' %}bg-gray-100 text-gray-800
+                            {% elif ticket.status == 'reopened' %}bg-red-100 text-red-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ ticket.status | replace('_', ' ') | title }}
+                        </span>
+                    </dd>
+                </div>
+
+                <!-- Type -->
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Type</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ ticket.type | replace('_', ' ') | title }}</dd>
+                </div>
+
+                <!-- Priority -->
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Priority</dt>
+                    <dd class="mt-1">
+                        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                            {% if ticket.priority == 'critical' %}bg-red-100 text-red-800
+                            {% elif ticket.priority == 'high' %}bg-orange-100 text-orange-800
+                            {% elif ticket.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                            {% elif ticket.priority == 'low' %}bg-green-100 text-green-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ ticket.priority | title }}
+                        </span>
+                    </dd>
+                </div>
+
+                <!-- Assignee -->
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Assignee</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {% if ticket.assignee %}
+                        <div class="flex items-center space-x-2">
+                            <div class="h-6 w-6 rounded-full bg-primary-100 flex items-center justify-center">
+                                <span class="text-xs font-medium text-primary-700">{{ ticket.assignee.username[:2] | upper }}</span>
+                            </div>
+                            <span>{{ ticket.assignee.username }}</span>
+                        </div>
+                        {% else %}
+                        <span class="text-gray-400 italic">Unassigned</span>
+                        {% endif %}
+                    </dd>
+                </div>
+
+                <!-- Reporter -->
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Reporter</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {% if ticket.reporter %}
+                        <div class="flex items-center space-x-2">
+                            <div class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center">
+                                <span class="text-xs font-medium text-gray-700">{{ ticket.reporter.username[:2] | upper }}</span>
+                            </div>
+                            <span>{{ ticket.reporter.username }}</span>
+                        </div>
+                        {% else %}
+                        <span class="text-gray-400 italic">Unknown</span>
+                        {% endif %}
+                    </dd>
+                </div>
+
+                <!-- Sprint -->
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Sprint</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {% if ticket.sprint %}
+                        <a href="/projects/{{ project.id }}/sprints/{{ ticket.sprint.id }}" class="text-primary-600 hover:text-primary-700 hover:underline">
+                            {{ ticket.sprint.name }}
+                        </a>
+                        {% else %}
+                        <span class="text-gray-400 italic">Backlog</span>
+                        {% endif %}
+                    </dd>
+                </div>
+
+                <!-- Parent Ticket -->
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Parent Ticket</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {% if ticket.parent %}
+                        <a href="/projects/{{ project.id }}/tickets/{{ ticket.parent.id }}" class="text-primary-600 hover:text-primary-700 hover:underline">
+                            {{ ticket.parent.ticket_key }} — {{ ticket.parent.title }}
+                        </a>
+                        {% else %}
+                        <span class="text-gray-400 italic">None</span>
+                        {% endif %}
+                    </dd>
+                </div>
+
+                <!-- Story Points -->
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Story Points</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {% if ticket.story_points is not none %}
+                        <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary-100 text-xs font-semibold text-primary-700">
+                            {{ ticket.story_points }}
+                        </span>
+                        {% else %}
+                        <span class="text-gray-400 italic">—</span>
+                        {% endif %}
+                    </dd>
+                </div>
+
+                <!-- Labels -->
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Labels</dt>
+                    <dd class="mt-1">
+                        {% if labels %}
+                        <div class="flex flex-wrap gap-1.5">
+                            {% for label in labels %}
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                                style="background-color: {{ label.color }}20; color: {{ label.color }};">
+                                <span class="mr-1 h-1.5 w-1.5 rounded-full" style="background-color: {{ label.color }};"></span>
+                                {{ label.name }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <span class="text-gray-400 italic text-sm">No labels</span>
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+        </div>
+
+        <!-- Dates -->
+        <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
+            <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Dates</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Created</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ ticket.created_at.strftime('%b %d, %Y at %I:%M %p') if ticket.created_at else '—' }}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Updated</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ ticket.updated_at.strftime('%b %d, %Y at %I:%M %p') if ticket.updated_at else '—' }}
+                    </dd>
+                </div>
+                {% if ticket.due_date %}
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Due Date</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {{ ticket.due_date.strftime('%b %d, %Y') }}
+                    </dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var dateInput = document.getElementById('spent_date');
+        if (dateInput && !dateInput.value) {
+            var today = new Date();
+            var yyyy = today.getFullYear();
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var dd = String(today.getDate()).padStart(2, '0');
+            dateInput.value = yyyy + '-' + mm + '-' + dd;
+        }
+    });
+</script>
+{% endblock %}

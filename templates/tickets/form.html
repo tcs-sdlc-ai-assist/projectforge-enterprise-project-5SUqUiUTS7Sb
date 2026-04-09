@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}{% if ticket %}Edit Ticket — {{ ticket.title }}{% else %}Create Ticket{% endif %} | ProjectForge{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <nav class="flex" aria-label="Breadcrumb">
+        <ol class="flex items-center space-x-2 text-sm text-gray-500">
+            <li>
+                <a href="/dashboard" class="hover:text-primary-600 transition-colors duration-150">Dashboard</a>
+            </li>
+            <li>
+                <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+            </li>
+            <li>
+                <a href="/projects" class="hover:text-primary-600 transition-colors duration-150">Projects</a>
+            </li>
+            <li>
+                <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+            </li>
+            <li>
+                <a href="/projects/{{ project.id }}" class="hover:text-primary-600 transition-colors duration-150">{{ project.name }}</a>
+            </li>
+            <li>
+                <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+            </li>
+            {% if ticket %}
+            <li>
+                <a href="/projects/{{ project.id }}/tickets/{{ ticket.id }}" class="hover:text-primary-600 transition-colors duration-150">{{ ticket.title }}</a>
+            </li>
+            <li>
+                <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+            </li>
+            <li>
+                <span class="font-medium text-gray-900">Edit</span>
+            </li>
+            {% else %}
+            <li>
+                <span class="font-medium text-gray-900">New Ticket</span>
+            </li>
+            {% endif %}
+        </ol>
+    </nav>
+
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900">
+            {% if ticket %}Edit Ticket{% else %}Create Ticket{% endif %}
+        </h1>
+        {% if ticket %}
+        <a href="/projects/{{ project.id }}/tickets/{{ ticket.id }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 transition-colors duration-150">
+            <svg class="h-4 w-4 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+            </svg>
+            Back to Ticket
+        </a>
+        {% else %}
+        <a href="/projects/{{ project.id }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 transition-colors duration-150">
+            <svg class="h-4 w-4 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+            </svg>
+            Back to Project
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+        <form method="POST" action="{% if ticket %}/projects/{{ project.id }}/tickets/{{ ticket.id }}/edit{% else %}/projects/{{ project.id }}/tickets/create{% endif %}" class="p-6 space-y-6">
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title <span class="text-red-500">*</span></label>
+                        <input type="text" name="title" id="title" required
+                            value="{{ ticket.title if ticket else '' }}"
+                            placeholder="Enter a descriptive ticket title"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea name="description" id="description" rows="8"
+                            placeholder="Provide a detailed description of the ticket. Markdown is supported."
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">{{ ticket.description if ticket and ticket.description else '' }}</textarea>
+                        <p class="mt-1 text-xs text-gray-500">Markdown formatting is supported.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Labels</label>
+                        {% if labels and labels|length > 0 %}
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {% for label in labels %}
+                            <label class="relative flex items-center px-3 py-2 rounded-md border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors duration-150">
+                                <input type="checkbox" name="label_ids" value="{{ label.id }}"
+                                    {% if ticket and ticket_label_ids and label.id in ticket_label_ids %}checked{% endif %}
+                                    class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <span class="ml-2 flex items-center text-sm text-gray-700">
+                                    <span class="inline-block w-3 h-3 rounded-full mr-1.5 flex-shrink-0" style="background-color: {{ label.color if label.color else '#6b7280' }};"></span>
+                                    {{ label.name }}
+                                </span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-sm text-gray-500 italic">No labels available. Labels can be created in the project settings.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+
+                    <div>
+                        <label for="ticket_type" class="block text-sm font-medium text-gray-700 mb-1">Type <span class="text-red-500">*</span></label>
+                        <select name="ticket_type" id="ticket_type" required
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                            <option value="">Select type</option>
+                            {% set type_options = [('bug', 'Bug'), ('feature', 'Feature'), ('task', 'Task'), ('improvement', 'Improvement'), ('epic', 'Epic')] %}
+                            {% for value, display in type_options %}
+                            <option value="{{ value }}" {% if ticket and ticket.ticket_type == value %}selected{% endif %}>{{ display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="priority" class="block text-sm font-medium text-gray-700 mb-1">Priority <span class="text-red-500">*</span></label>
+                        <select name="priority" id="priority" required
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                            <option value="">Select priority</option>
+                            {% set priority_options = [('critical', 'Critical'), ('high', 'High'), ('medium', 'Medium'), ('low', 'Low')] %}
+                            {% for value, display in priority_options %}
+                            <option value="{{ value }}" {% if ticket and ticket.priority == value %}selected{% elif not ticket and value == 'medium' %}selected{% endif %}>{{ display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {% if ticket %}
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select name="status" id="status"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                            {% set status_options = [('open', 'Open'), ('in_progress', 'In Progress'), ('in_review', 'In Review'), ('resolved', 'Resolved'), ('closed', 'Closed'), ('reopened', 'Reopened')] %}
+                            {% for value, display in status_options %}
+                            <option value="{{ value }}" {% if ticket.status == value %}selected{% endif %}>{{ display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <label for="assignee_id" class="block text-sm font-medium text-gray-700 mb-1">Assignee</label>
+                        <select name="assignee_id" id="assignee_id"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                            <option value="">Unassigned</option>
+                            {% if members %}
+                            {% for member in members %}
+                            <option value="{{ member.id }}" {% if ticket and ticket.assignee_id and ticket.assignee_id == member.id %}selected{% endif %}>{{ member.username if member.username else member.email }}</option>
+                            {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="sprint_id" class="block text-sm font-medium text-gray-700 mb-1">Sprint</label>
+                        <select name="sprint_id" id="sprint_id"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                            <option value="">No Sprint (Backlog)</option>
+                            {% if sprints %}
+                            {% for sprint in sprints %}
+                            <option value="{{ sprint.id }}" {% if ticket and ticket.sprint_id and ticket.sprint_id == sprint.id %}selected{% endif %}>
+                                {{ sprint.name }}{% if sprint.status %} ({{ sprint.status | replace('_', ' ') | title }}){% endif %}
+                            </option>
+                            {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="parent_id" class="block text-sm font-medium text-gray-700 mb-1">Parent Ticket</label>
+                        <select name="parent_id" id="parent_id"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                            <option value="">None (Top-level ticket)</option>
+                            {% if parent_tickets %}
+                            {% for parent in parent_tickets %}
+                            {% if not ticket or parent.id != ticket.id %}
+                            <option value="{{ parent.id }}" {% if ticket and ticket.parent_id and ticket.parent_id == parent.id %}selected{% endif %}>
+                                {{ parent.title }}
+                            </option>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                        </select>
+                        <p class="mt-1 text-xs text-gray-500">Set a parent to make this a sub-task.</p>
+                    </div>
+
+                    <div>
+                        <label for="story_points" class="block text-sm font-medium text-gray-700 mb-1">Story Points</label>
+                        <input type="number" name="story_points" id="story_points" min="0" max="100" step="1"
+                            value="{{ ticket.story_points if ticket and ticket.story_points is not none else '' }}"
+                            placeholder="0"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                        <p class="mt-1 text-xs text-gray-500">Estimate effort (e.g., 1, 2, 3, 5, 8, 13).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+                {% if ticket %}
+                <a href="/projects/{{ project.id }}/tickets/{{ ticket.id }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 transition-colors duration-150">
+                    Cancel
+                </a>
+                {% else %}
+                <a href="/projects/{{ project.id }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 transition-colors duration-150">
+                    Cancel
+                </a>
+                {% endif %}
+                <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                    <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        {% if ticket %}
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                        {% else %}
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        {% endif %}
+                    </svg>
+                    {% if ticket %}Update Ticket{% else %}Create Ticket{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var typeSelect = document.getElementById('ticket_type');
+        if (typeSelect) {
+            var typeIcons = {
+                'bug': '🐛',
+                'feature': '✨',
+                'task': '📋',
+                'improvement': '🔧',
+                'epic': '🏔️'
+            };
+
+            function updateTypeDisplay() {
+                var selected = typeSelect.value;
+                var options = typeSelect.querySelectorAll('option');
+                options.forEach(function(opt) {
+                    if (opt.value && typeIcons[opt.value]) {
+                        opt.textContent = typeIcons[opt.value] + ' ' + opt.value.charAt(0).toUpperCase() + opt.value.slice(1);
+                    }
+                });
+            }
+            updateTypeDisplay();
+        }
+
+        var prioritySelect = document.getElementById('priority');
+        if (prioritySelect) {
+            var priorityIcons = {
+                'critical': '🔴',
+                'high': '🟠',
+                'medium': '🟡',
+                'low': '🟢'
+            };
+
+            function updatePriorityDisplay() {
+                var options = prioritySelect.querySelectorAll('option');
+                options.forEach(function(opt) {
+                    if (opt.value && priorityIcons[opt.value]) {
+                        opt.textContent = priorityIcons[opt.value] + ' ' + opt.value.charAt(0).toUpperCase() + opt.value.slice(1);
+                    }
+                });
+            }
+            updatePriorityDisplay();
+        }
+    });
+</script>
+{% endblock %}

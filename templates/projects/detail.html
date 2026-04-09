@@ -1,0 +1,388 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }} — ProjectForge{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumb -->
+    <nav class="flex" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="/dashboard" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors duration-150">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                    <a href="/projects" class="ml-1 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors duration-150 md:ml-2">Projects</a>
+                </div>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                    <span class="ml-1 text-sm font-medium text-gray-900 md:ml-2">{{ project.name }}</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Project Header -->
+    <div class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+        <div class="px-6 py-5 sm:px-8">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <h1 class="text-2xl font-bold text-gray-900 truncate">{{ project.name }}</h1>
+                        {% if project.key %}
+                        <span class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-mono font-medium text-gray-700 ring-1 ring-inset ring-gray-300">{{ project.key }}</span>
+                        {% endif %}
+                        {% if project.status == 'planning' %}
+                        <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">Planning</span>
+                        {% elif project.status == 'active' %}
+                        <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Active</span>
+                        {% elif project.status == 'on_hold' %}
+                        <span class="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-800">On Hold</span>
+                        {% elif project.status == 'completed' %}
+                        <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">Completed</span>
+                        {% elif project.status == 'archived' %}
+                        <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">Archived</span>
+                        {% endif %}
+                    </div>
+                    {% if project.description %}
+                    <p class="mt-2 text-sm text-gray-600 max-w-3xl">{{ project.description }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex flex-wrap gap-2 flex-shrink-0">
+                    <a href="/projects/{{ project.id }}/edit" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-150">
+                        <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                        </svg>
+                        Edit
+                    </a>
+                    <a href="/projects/{{ project.id }}/board" class="inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-700 transition-colors duration-150">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z" />
+                        </svg>
+                        View Board
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Details Grid -->
+        <div class="border-t border-gray-200 px-6 py-5 sm:px-8">
+            <dl class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {% if project.owner %}
+                            {{ project.owner.full_name or project.owner.username or project.owner.email }}
+                        {% else %}
+                            <span class="text-gray-400">Unassigned</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Department</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {% if project.department %}
+                            {{ project.department.name }}
+                        {% else %}
+                            <span class="text-gray-400">None</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {% if project.start_date %}
+                            {{ project.start_date.strftime('%b %d, %Y') if project.start_date else '—' }}
+                        {% else %}
+                            <span class="text-gray-400">—</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">End Date</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {% if project.end_date %}
+                            {{ project.end_date.strftime('%b %d, %Y') if project.end_date else '—' }}
+                        {% else %}
+                            <span class="text-gray-400">—</span>
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Action Buttons Row -->
+    <div class="flex flex-wrap gap-3">
+        <a href="/projects/{{ project.id }}/members" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-150">
+            <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+            </svg>
+            Manage Members
+        </a>
+        <a href="/projects/{{ project.id }}/sprints" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-150">
+            <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+            </svg>
+            Manage Sprints
+        </a>
+        <a href="/projects/{{ project.id }}/tickets" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-150">
+            <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+            </svg>
+            Manage Tickets
+        </a>
+        <a href="/projects/{{ project.id }}/labels" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-150">
+            <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+            </svg>
+            Manage Labels
+        </a>
+    </div>
+
+    <!-- Two Column Layout: Members + Sprints/Tickets -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Members Panel -->
+        <div class="lg:col-span-1">
+            <div class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-gray-900">Members</h2>
+                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
+                        {{ members | length if members else 0 }}
+                    </span>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    {% if members %}
+                        {% for member in members %}
+                        <div class="px-5 py-3 flex items-center justify-between">
+                            <div class="flex items-center min-w-0">
+                                <div class="flex-shrink-0 h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
+                                    <span class="text-xs font-medium text-primary-700">
+                                        {% if member.user %}
+                                            {{ (member.user.full_name or member.user.username or member.user.email)[:2] | upper }}
+                                        {% else %}
+                                            ??
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="ml-3 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        {% if member.user %}
+                                            {{ member.user.full_name or member.user.username or member.user.email }}
+                                        {% else %}
+                                            Unknown User
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+                                {% if member.role == 'project_manager' %}bg-blue-100 text-blue-800
+                                {% elif member.role == 'team_lead' %}bg-green-100 text-green-800
+                                {% elif member.role == 'developer' %}bg-purple-100 text-purple-800
+                                {% elif member.role == 'viewer' %}bg-gray-100 text-gray-700
+                                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                {{ member.role | replace('_', ' ') | title if member.role else 'Member' }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="px-5 py-8 text-center">
+                            <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                            </svg>
+                            <p class="mt-2 text-sm text-gray-500">No members yet</p>
+                            <a href="/projects/{{ project.id }}/members" class="mt-2 inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700">
+                                Add members
+                                <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                </svg>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if members and members | length > 0 %}
+                <div class="px-5 py-3 bg-gray-50 border-t border-gray-200">
+                    <a href="/projects/{{ project.id }}/members" class="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors duration-150">
+                        View all members →
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sprints + Tickets Column -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Recent Sprints -->
+            <div class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-gray-900">Recent Sprints</h2>
+                    <a href="/projects/{{ project.id }}/sprints" class="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors duration-150">View all</a>
+                </div>
+                {% if sprints %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sprint</th>
+                                <th scope="col" class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start</th>
+                                <th scope="col" class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for sprint in sprints %}
+                            <tr class="hover:bg-gray-50 transition-colors duration-100">
+                                <td class="px-5 py-3 whitespace-nowrap">
+                                    <a href="/projects/{{ project.id }}/sprints/{{ sprint.id }}" class="text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors duration-150">{{ sprint.name }}</a>
+                                </td>
+                                <td class="px-5 py-3 whitespace-nowrap">
+                                    {% if sprint.status == 'planning' %}
+                                    <span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">Planning</span>
+                                    {% elif sprint.status == 'active' %}
+                                    <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">Active</span>
+                                    {% elif sprint.status == 'completed' %}
+                                    <span class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">Completed</span>
+                                    {% else %}
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">{{ sprint.status | title }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-5 py-3 whitespace-nowrap text-sm text-gray-500">
+                                    {{ sprint.start_date.strftime('%b %d, %Y') if sprint.start_date else '—' }}
+                                </td>
+                                <td class="px-5 py-3 whitespace-nowrap text-sm text-gray-500">
+                                    {{ sprint.end_date.strftime('%b %d, %Y') if sprint.end_date else '—' }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="px-5 py-8 text-center">
+                    <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-500">No sprints created yet</p>
+                    <a href="/projects/{{ project.id }}/sprints" class="mt-2 inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700">
+                        Create a sprint
+                        <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Recent Tickets -->
+            <div class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-gray-900">Recent Tickets</h2>
+                    <a href="/projects/{{ project.id }}/tickets" class="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors duration-150">View all</a>
+                </div>
+                {% if tickets %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket</th>
+                                <th scope="col" class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                <th scope="col" class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                                <th scope="col" class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assignee</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for ticket in tickets %}
+                            <tr class="hover:bg-gray-50 transition-colors duration-100">
+                                <td class="px-5 py-3">
+                                    <a href="/projects/{{ project.id }}/tickets/{{ ticket.id }}" class="text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors duration-150">{{ ticket.title }}</a>
+                                </td>
+                                <td class="px-5 py-3 whitespace-nowrap">
+                                    {% if ticket.type == 'bug' %}
+                                    <span class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">Bug</span>
+                                    {% elif ticket.type == 'feature' %}
+                                    <span class="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800">Feature</span>
+                                    {% elif ticket.type == 'task' %}
+                                    <span class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">Task</span>
+                                    {% elif ticket.type == 'improvement' %}
+                                    <span class="inline-flex items-center rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-800">Improvement</span>
+                                    {% elif ticket.type == 'epic' %}
+                                    <span class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800">Epic</span>
+                                    {% else %}
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">{{ ticket.type | title if ticket.type else '—' }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-5 py-3 whitespace-nowrap">
+                                    {% if ticket.priority == 'critical' %}
+                                    <span class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">Critical</span>
+                                    {% elif ticket.priority == 'high' %}
+                                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800">High</span>
+                                    {% elif ticket.priority == 'medium' %}
+                                    <span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">Medium</span>
+                                    {% elif ticket.priority == 'low' %}
+                                    <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">Low</span>
+                                    {% else %}
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">{{ ticket.priority | title if ticket.priority else '—' }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-5 py-3 whitespace-nowrap">
+                                    {% if ticket.status == 'open' %}
+                                    <span class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">Open</span>
+                                    {% elif ticket.status == 'in_progress' %}
+                                    <span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">In Progress</span>
+                                    {% elif ticket.status == 'in_review' %}
+                                    <span class="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800">In Review</span>
+                                    {% elif ticket.status == 'resolved' %}
+                                    <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">Resolved</span>
+                                    {% elif ticket.status == 'closed' %}
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">Closed</span>
+                                    {% elif ticket.status == 'reopened' %}
+                                    <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800">Reopened</span>
+                                    {% else %}
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">{{ ticket.status | replace('_', ' ') | title if ticket.status else '—' }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-5 py-3 whitespace-nowrap text-sm text-gray-500">
+                                    {% if ticket.assignee %}
+                                        {{ ticket.assignee.full_name or ticket.assignee.username or ticket.assignee.email }}
+                                    {% else %}
+                                        <span class="text-gray-400">Unassigned</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="px-5 py-8 text-center">
+                    <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-500">No tickets created yet</p>
+                    <a href="/projects/{{ project.id }}/tickets" class="mt-2 inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700">
+                        Create a ticket
+                        <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

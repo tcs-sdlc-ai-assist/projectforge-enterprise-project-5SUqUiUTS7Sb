@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}{% if sprint %}Edit Sprint{% else %}New Sprint{% endif %} — ProjectForge{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <nav class="flex" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="/projects" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors duration-150">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                    </svg>
+                    Projects
+                </a>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                    <a href="/projects/{{ project.id }}" class="ml-1 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors duration-150 md:ml-2">{{ project.name }}</a>
+                </div>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                    <a href="/projects/{{ project.id }}/sprints" class="ml-1 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors duration-150 md:ml-2">Sprints</a>
+                </div>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                    <span class="ml-1 text-sm font-medium text-gray-700 md:ml-2">{% if sprint %}Edit Sprint{% else %}New Sprint{% endif %}</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+</div>
+
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+        <div class="px-6 py-5 border-b border-gray-200">
+            <h1 class="text-xl font-semibold text-gray-900">
+                {% if sprint %}Edit Sprint{% else %}Create New Sprint{% endif %}
+            </h1>
+            <p class="mt-1 text-sm text-gray-500">
+                {% if sprint %}Update the sprint details below.{% else %}Plan a new sprint for <span class="font-medium text-gray-700">{{ project.name }}</span>.{% endif %}
+            </p>
+        </div>
+
+        <form method="POST" action="{% if sprint %}/projects/{{ project.id }}/sprints/{{ sprint.id }}/edit{% else %}/projects/{{ project.id }}/sprints/create{% endif %}" class="px-6 py-6 space-y-6">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Sprint Name <span class="text-red-500">*</span></label>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value="{{ sprint.name if sprint else '' }}"
+                    required
+                    maxlength="200"
+                    placeholder="e.g., Sprint 1 — User Authentication"
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 sm:text-sm"
+                >
+            </div>
+
+            <div>
+                <label for="goal" class="block text-sm font-medium text-gray-700 mb-1">Sprint Goal</label>
+                <textarea
+                    id="goal"
+                    name="goal"
+                    rows="4"
+                    placeholder="Describe the objective of this sprint..."
+                    class="block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 sm:text-sm"
+                >{{ sprint.goal if sprint and sprint.goal else '' }}</textarea>
+                <p class="mt-1 text-xs text-gray-500">A brief summary of what the team aims to accomplish during this sprint.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date <span class="text-red-500">*</span></label>
+                    <input
+                        type="date"
+                        id="start_date"
+                        name="start_date"
+                        value="{{ sprint.start_date.strftime('%Y-%m-%d') if sprint and sprint.start_date else '' }}"
+                        required
+                        class="block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 sm:text-sm"
+                    >
+                </div>
+
+                <div>
+                    <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">End Date <span class="text-red-500">*</span></label>
+                    <input
+                        type="date"
+                        id="end_date"
+                        name="end_date"
+                        value="{{ sprint.end_date.strftime('%Y-%m-%d') if sprint and sprint.end_date else '' }}"
+                        required
+                        class="block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 sm:text-sm"
+                    >
+                </div>
+            </div>
+
+            {% if error %}
+            <div class="rounded-md bg-red-50 border border-red-200 p-4">
+                <div class="flex">
+                    <svg class="h-5 w-5 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                    <p class="ml-3 text-sm text-red-700">{{ error }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+                <a href="/projects/{{ project.id }}/sprints" class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                    Cancel
+                </a>
+                <button type="submit" class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-primary-600 border border-transparent shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150">
+                    <svg class="w-4 h-4 mr-2 -ml-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        {% if sprint %}
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        {% else %}
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        {% endif %}
+                    </svg>
+                    {% if sprint %}Update Sprint{% else %}Create Sprint{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var startDateInput = document.getElementById('start_date');
+        var endDateInput = document.getElementById('end_date');
+
+        if (startDateInput && endDateInput) {
+            startDateInput.addEventListener('change', function() {
+                if (startDateInput.value) {
+                    endDateInput.min = startDateInput.value;
+                    if (endDateInput.value && endDateInput.value < startDateInput.value) {
+                        endDateInput.value = '';
+                    }
+                }
+            });
+
+            endDateInput.addEventListener('change', function() {
+                if (endDateInput.value) {
+                    startDateInput.max = endDateInput.value;
+                }
+            });
+
+            if (startDateInput.value) {
+                endDateInput.min = startDateInput.value;
+            }
+            if (endDateInput.value) {
+                startDateInput.max = endDateInput.value;
+            }
+        }
+    });
+</script>
+{% endblock %}

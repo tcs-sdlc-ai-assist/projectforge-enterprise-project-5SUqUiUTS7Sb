@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Labels — ProjectForge{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumb -->
+    <nav class="flex" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="/dashboard" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors duration-150">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    Dashboard
+                </a>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="ml-1 text-sm font-medium text-gray-700 md:ml-2">Labels</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Labels</h1>
+            <p class="mt-1 text-sm text-gray-500">Manage labels for categorizing tickets across projects.</p>
+        </div>
+    </div>
+
+    <!-- Create Label Form -->
+    <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900">Create New Label</h2>
+        </div>
+        <div class="px-4 py-5 sm:px-6">
+            <form method="POST" action="/labels" class="flex flex-col sm:flex-row sm:items-end gap-4">
+                <div class="flex-1">
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Label Name</label>
+                    <input type="text" name="name" id="name" required placeholder="e.g. bug, enhancement, documentation"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                </div>
+                <div class="w-full sm:w-48">
+                    <label for="color" class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                    <div class="flex items-center gap-2">
+                        <input type="color" name="color" id="color" value="#3b82f6"
+                            class="h-10 w-14 rounded border border-gray-300 cursor-pointer p-0.5">
+                        <input type="text" id="color-hex" value="#3b82f6" maxlength="7" pattern="^#[0-9A-Fa-f]{6}$"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border font-mono">
+                    </div>
+                </div>
+                <div>
+                    <button type="submit"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150 whitespace-nowrap">
+                        <svg class="w-4 h-4 mr-1.5 -ml-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        Create Label
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Labels Table -->
+    <div class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+        {% if labels and labels | length > 0 %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Label</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Color Code</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tickets</th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for label in labels %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-100">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <span class="inline-block w-4 h-4 rounded-full mr-3 flex-shrink-0 border border-gray-200" style="background-color: {{ label.color }};" aria-hidden="true"></span>
+                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border" style="background-color: {{ label.color }}20; color: {{ label.color }}; border-color: {{ label.color }}40;">
+                                    {{ label.name }}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <code class="text-sm font-mono text-gray-600 bg-gray-100 px-2 py-0.5 rounded">{{ label.color }}</code>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ label.ticket_count | default(0) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                            <form method="POST" action="/labels/{{ label.id }}/delete" class="inline"
+                                onsubmit="return confirm('Are you sure you want to delete the label \'{{ label.name }}\'? This will remove it from all associated tickets.');">
+                                <button type="submit"
+                                    class="inline-flex items-center px-3 py-1.5 border border-red-200 text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-150">
+                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                    </svg>
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="px-6 py-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No labels yet</h3>
+            <p class="mt-1 text-sm text-gray-500">Get started by creating your first label using the form above.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var colorPicker = document.getElementById('color');
+        var colorHex = document.getElementById('color-hex');
+
+        if (colorPicker && colorHex) {
+            colorPicker.addEventListener('input', function() {
+                colorHex.value = colorPicker.value;
+            });
+
+            colorHex.addEventListener('input', function() {
+                var val = colorHex.value;
+                if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                    colorPicker.value = val;
+                }
+            });
+
+            colorHex.addEventListener('change', function() {
+                var val = colorHex.value;
+                if (!val.startsWith('#')) {
+                    val = '#' + val;
+                }
+                if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                    colorHex.value = val;
+                    colorPicker.value = val;
+                } else {
+                    colorHex.value = colorPicker.value;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
